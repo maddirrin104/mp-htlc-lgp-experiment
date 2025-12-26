@@ -20,10 +20,10 @@ contract MPHTLC_LGP is EIP712 {
         address signer; // ADDR_TSS (aggregate public key address) used to authorize claim
         uint256 amount;
         bytes32 hashlock;
-        uint256 timelock;        // absolute timestamp T
-        uint256 penaltyWindow;   // Tw (seconds)
+        uint256 timelock; // absolute timestamp T
+        uint256 penaltyWindow; // Tw (seconds)
         uint256 depositRequired; // wei
-        uint256 depositWindow;   // seconds since createdAt
+        uint256 depositWindow; // seconds since createdAt
         uint256 createdAt;
         bool depositConfirmed;
         bool claimed;
@@ -32,9 +32,18 @@ contract MPHTLC_LGP is EIP712 {
 
     mapping(bytes32 => Lock) public locks;
 
-    event Locked(bytes32 indexed lockId, address indexed sender, address indexed receiver, address token, uint256 amount, bytes32 hashlock);
+    event Locked(
+        bytes32 indexed lockId,
+        address indexed sender,
+        address indexed receiver,
+        address token,
+        uint256 amount,
+        bytes32 hashlock
+    );
     event ParticipationConfirmed(bytes32 indexed lockId, address indexed receiver, uint256 deposit);
-    event Claimed(bytes32 indexed lockId, address indexed receiver, bytes32 preimage, uint256 penalty, uint256 depositRefund);
+    event Claimed(
+        bytes32 indexed lockId, address indexed receiver, bytes32 preimage, uint256 penalty, uint256 depositRefund
+    );
     event Refunded(bytes32 indexed lockId, address indexed to, uint256 tokenAmount, uint256 depositPaid);
 
     error LockExists();
@@ -132,13 +141,13 @@ contract MPHTLC_LGP is EIP712 {
 
         // 2) Pay deposit refund to receiver
         if (refundDeposit > 0) {
-            (bool ok1, ) = payable(L.receiver).call{value: refundDeposit}("");
+            (bool ok1,) = payable(L.receiver).call{value: refundDeposit}("");
             require(ok1, "refund fail");
         }
 
         // 3) Pay penalty to sender
         if (penalty > 0) {
-            (bool ok2, ) = payable(L.sender).call{value: penalty}("");
+            (bool ok2,) = payable(L.sender).call{value: penalty}("");
             require(ok2, "penalty pay fail");
         }
 
@@ -165,12 +174,16 @@ contract MPHTLC_LGP is EIP712 {
         if (block.timestamp < L.timelock) revert TooEarly();
         L.refunded = true;
         IERC20(L.token).safeTransfer(L.sender, L.amount);
-        (bool ok, ) = payable(L.sender).call{value: L.depositRequired}("");
+        (bool ok,) = payable(L.sender).call{value: L.depositRequired}("");
         require(ok, "deposit to sender fail");
         emit Refunded(lockId, L.sender, L.amount, L.depositRequired);
     }
 
-    function _calcPenalty(Lock storage L, uint256 claimTime) internal view returns (uint256 penalty, uint256 refundDeposit) {
+    function _calcPenalty(Lock storage L, uint256 claimTime)
+        internal
+        view
+        returns (uint256 penalty, uint256 refundDeposit)
+    {
         // Penalty starts at timelock - penaltyWindow
         uint256 penaltyStart = L.timelock - L.penaltyWindow;
 
