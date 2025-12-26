@@ -1,0 +1,117 @@
+services:
+  tss-coordinator:
+    build:
+      context: ..
+      dockerfile: tssnet/docker/Dockerfile
+      args:
+        CMD: tss-coordinator
+    ports:
+      - "9000:9000"
+
+  tss-gateway:
+    build:
+      context: ..
+      dockerfile: tssnet/docker/Dockerfile
+      args:
+        CMD: tss-gateway
+    depends_on:
+      - tss-coordinator
+    ports:
+      - "9100:9100"
+    command:
+      - "-coordinator=ws://tss-coordinator:9000/ws"
+      - "-session=cluster"
+      - "-party=G"
+      - "-parties=P1,P2,P3"
+      - "-threshold=1"
+      - "-listen=:9100"
+
+  tss-node-P1:
+    build:
+      context: ..
+      dockerfile: tssnet/docker/Dockerfile
+      args:
+        CMD: tss-node
+    depends_on:
+      - tss-coordinator
+    cap_add:
+      - NET_ADMIN
+    entrypoint:
+      - /usr/local/bin/node_entrypoint.sh
+    volumes:
+      - ./data/P1:/data
+    environment:
+      # set any of these to enable network emulation inside the container
+      # LATENCY_MS: "80"
+      # JITTER_MS: "20"
+      # LOSS_PCT: "0.5"
+      # TC_IFACE: "eth0"
+      - LATENCY_MS=0
+      - JITTER_MS=0
+      - LOSS_PCT=0
+    command:
+      - "-coordinator=ws://tss-coordinator:9000/ws"
+      - "-session=cluster"
+      - "-party=P1"
+      - "-data=/data"
+      - "-gateway=G"
+
+  tss-node-P2:
+    build:
+      context: ..
+      dockerfile: tssnet/docker/Dockerfile
+      args:
+        CMD: tss-node
+    depends_on:
+      - tss-coordinator
+    cap_add:
+      - NET_ADMIN
+    entrypoint:
+      - /usr/local/bin/node_entrypoint.sh
+    volumes:
+      - ./data/P2:/data
+    environment:
+      # set any of these to enable network emulation inside the container
+      # LATENCY_MS: "80"
+      # JITTER_MS: "20"
+      # LOSS_PCT: "0.5"
+      # TC_IFACE: "eth0"
+      - LATENCY_MS=0
+      - JITTER_MS=0
+      - LOSS_PCT=0
+    command:
+      - "-coordinator=ws://tss-coordinator:9000/ws"
+      - "-session=cluster"
+      - "-party=P2"
+      - "-data=/data"
+      - "-gateway=G"
+
+  tss-node-P3:
+    build:
+      context: ..
+      dockerfile: tssnet/docker/Dockerfile
+      args:
+        CMD: tss-node
+    depends_on:
+      - tss-coordinator
+    cap_add:
+      - NET_ADMIN
+    entrypoint:
+      - /usr/local/bin/node_entrypoint.sh
+    volumes:
+      - ./data/P3:/data
+    environment:
+      # set any of these to enable network emulation inside the container
+      # LATENCY_MS: "80"
+      # JITTER_MS: "20"
+      # LOSS_PCT: "0.5"
+      # TC_IFACE: "eth0"
+      - LATENCY_MS=0
+      - JITTER_MS=0
+      - LOSS_PCT=0
+    command:
+      - "-coordinator=ws://tss-coordinator:9000/ws"
+      - "-session=cluster"
+      - "-party=P3"
+      - "-data=/data"
+      - "-gateway=G"

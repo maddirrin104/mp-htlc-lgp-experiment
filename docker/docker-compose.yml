@@ -1,0 +1,27 @@
+services:
+  tss-us:
+    build:
+      context: ./tss-node
+    cap_add: ["NET_ADMIN"]
+    environment:
+      - NODE_NAME=tss-us
+      - NETEM_DELAY=0ms
+      - NETEM_LOSS=0%
+
+  tss-eu:
+    build:
+      context: ./tss-node
+    cap_add: ["NET_ADMIN"]
+    environment:
+      - NODE_NAME=tss-eu
+      - NETEM_DELAY=150ms
+      - NETEM_LOSS=0.1%
+
+  tss-as:
+    build:
+      context: ./tss-node
+    cap_add: ["NET_ADMIN"]
+    environment:
+      - NODE_NAME=tss-as
+      - NETEM_DELAY=250ms
+      - NETEM_LOSS=0.3%
