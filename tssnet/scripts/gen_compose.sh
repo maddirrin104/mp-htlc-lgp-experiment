@@ -44,10 +44,12 @@ services:
 YAML
 
 for i in $(seq 1 $N); do
-  PARTY="P$i"
+  PARTY="P$i"          # party ID (giữ uppercase)
+  SVC="p$i"            # service name (lowercase để Docker hợp lệ)
+
   cat >> "$OUT" <<YAML
 
-  tss-node-$PARTY:
+  tss-node-$SVC:
     build:
       context: ..
       dockerfile: tssnet/docker/Dockerfile

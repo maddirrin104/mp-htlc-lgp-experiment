@@ -1,4 +1,4 @@
-package tssapi
+package tssnet
 
 import (
 	"bytes"

@@ -1,6 +1,7 @@
 package main
 
 import (
+	stdecdsa "crypto/ecdsa"
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
@@ -118,9 +119,9 @@ func handleCmd(rt *runtime, c *websocket.Conn, m tssnet.WSMessage) {
 
 		switch m.Cmd {
 		case "keygen":
-				if err := runKeygen(rt, c, m.Parties, m.Threshold); err != nil {
-					sendResult(c, tssnet.WSMessage{Type: "cmd", Session: *clusterSession, Party: *partyStr, Parties: []string{*gatewayParty}, Cmd: "keygen_result", Ok: false, Err: errString(err)})
-				}
+			if err := runKeygen(rt, c, m.Parties, m.Threshold); err != nil {
+				sendResult(c, tssnet.WSMessage{Type: "cmd", Session: *clusterSession, Party: *partyStr, Parties: []string{*gatewayParty}, Cmd: "keygen_result", Ok: false, Err: errString(err)})
+			}
 		case "sign":
 			err := runSign(rt, c, m.Parties, m.Threshold, m.HashHex)
 			// runSign itself will send sign_result (with r,s) if ok
@@ -171,7 +172,7 @@ func runKeygen(rt *runtime, c *websocket.Conn, parties []string, threshold int) 
 	params := tss.NewParameters(tss.S256(), ctx, thisParty, len(partyIDs), threshold)
 
 	outCh := make(chan tss.Message, 1024)
-	endCh := make(chan keygen.LocalPartySaveData, 1)
+	endCh := make(chan *keygen.LocalPartySaveData, 1)
 
 	// omit preParams => library computes in round 1
 	local := keygen.NewLocalParty(params, outCh, endCh)
@@ -200,12 +201,19 @@ func runKeygen(rt *runtime, c *websocket.Conn, parties []string, threshold int) 
 			to := routeToStrings(parties, routing, thisID)
 			sendWire(c, to, routing.From.Id, routing.IsBroadcast, wire)
 		case save := <-endCh:
+			if save == nil {
+				return errors.New("nil keygen result")
+			}
 			// persist key shares locally
-			if err := persistKeygen(*dataDir, save); err != nil {
+			if err := persistKeygen(*dataDir, *save); err != nil {
 				log.Printf("persist keygen error: %v", err)
 			}
-			pub := crypto.FromECDSAPub(save.ECDSAPub)
-			addr := crypto.PubkeyToAddress(*save.ECDSAPub).Hex()
+			if save.ECDSAPub == nil {
+				return errors.New("nil ECDSAPub in keygen result")
+			}
+			ecdsaPub := &stdecdsa.PublicKey{Curve: save.ECDSAPub.Curve(), X: save.ECDSAPub.X(), Y: save.ECDSAPub.Y()}
+			pub := crypto.FromECDSAPub(ecdsaPub)
+			addr := crypto.PubkeyToAddress(*ecdsaPub).Hex()
 			// send a richer result to gateway
 			sendResult(c, tssnet.WSMessage{Type: "cmd", Session: *clusterSession, Party: thisID, Parties: []string{*gatewayParty}, Cmd: "keygen_result", Ok: true, PubKeyHex: "0x" + hex.EncodeToString(pub), AddrHex: addr})
 			return nil
@@ -307,19 +315,23 @@ func routeToStrings(all []string, routing *tss.MessageRouting, self string) []st
 }
 
 func makeParties(parties []string, self string) ([]*tss.PartyID, map[string]*tss.PartyID, *tss.PartyID, error) {
-	partyIDs := make([]*tss.PartyID, 0, len(parties))
-	idMap := map[string]*tss.PartyID{}
-	var this *tss.PartyID
+	unsorted := make([]*tss.PartyID, 0, len(parties))
 	for i, id := range parties {
 		id = strings.TrimSpace(id)
 		uid := big.NewInt(int64(i + 1))
 		pid := tss.NewPartyID(id, id, uid)
-		partyIDs = append(partyIDs, pid)
-		idMap[id] = pid
-		if id == self {
-			this = pid
-		}
+		unsorted = append(unsorted, pid)
 	}
+
+	// IMPORTANT: tss-lib/v2 cần sort để gán Index hợp lệ (không còn -1)
+	partyIDs := tss.SortPartyIDs(unsorted)
+
+	idMap := map[string]*tss.PartyID{}
+	for _, pid := range partyIDs {
+		idMap[pid.Id] = pid
+	}
+
+	this := idMap[self]
 	if this == nil {
 		return nil, nil, nil, fmt.Errorf("self party %s not in parties", self)
 	}

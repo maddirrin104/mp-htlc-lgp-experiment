@@ -1,14 +1,16 @@
 # Multi-party TSS services (coordinator, gateway, node)
 
 FROM golang:1.22-alpine AS builder
+RUN apk add --no-cache git ca-certificates
 WORKDIR /src
 
-# Copy module files first for caching
-COPY go/go.mod go/go.sum* ./go/
-COPY go ./go
-
-WORKDIR /src/go
+# 1) Copy go.mod/go.sum trước để cache dependency layer
+COPY go/go.mod go/go.sum* ./
 RUN go mod download
+
+# 2) Copy TOÀN BỘ contents của thư mục go/ vào module root (/src)
+#    (quan trọng: dùng go/. chứ không phải go)
+COPY go/. ./
 
 ARG CMD
 RUN go build -trimpath -ldflags="-s -w" -o /out/app ./cmd/${CMD}

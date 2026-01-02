@@ -22,7 +22,7 @@ import (
 
 	"mp-htlc-lgp/experiment/internal/config"
 	"mp-htlc-lgp/experiment/internal/eth"
-	"mp-htlc-lgp/experiment/internal/tssapi"
+	"mp-htlc-lgp/experiment/internal/tssnet"
 )
 
 func must(b *big.Int, err error) *big.Int {

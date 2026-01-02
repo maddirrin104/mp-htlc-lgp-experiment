@@ -10,7 +10,7 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 
-	"mp-htlc-lgp/experiment/internal/tssapi"
+	"mp-htlc-lgp/experiment/internal/tssnet"
 )
 
 // SignAndSendDynamicTx asks the TSS signer for (r,s), derives the recovery id v,

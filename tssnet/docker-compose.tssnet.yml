@@ -22,11 +22,11 @@ services:
       - "-coordinator=ws://tss-coordinator:9000/ws"
       - "-session=cluster"
       - "-party=G"
-      - "-parties=P1,P2,P3"
-      - "-threshold=1"
+      - "-parties=P1,P2,P3,P4,P5"
+      - "-threshold=2"
       - "-listen=:9100"
 
-  tss-node-P1:
+  tss-node-p1:
     build:
       context: ..
       dockerfile: tssnet/docker/Dockerfile
@@ -56,7 +56,7 @@ services:
       - "-data=/data"
       - "-gateway=G"
 
-  tss-node-P2:
+  tss-node-p2:
     build:
       context: ..
       dockerfile: tssnet/docker/Dockerfile
@@ -86,7 +86,7 @@ services:
       - "-data=/data"
       - "-gateway=G"
 
-  tss-node-P3:
+  tss-node-p3:
     build:
       context: ..
       dockerfile: tssnet/docker/Dockerfile
@@ -113,5 +113,65 @@ services:
       - "-coordinator=ws://tss-coordinator:9000/ws"
       - "-session=cluster"
       - "-party=P3"
+      - "-data=/data"
+      - "-gateway=G"
+
+  tss-node-p4:
+    build:
+      context: ..
+      dockerfile: tssnet/docker/Dockerfile
+      args:
+        CMD: tss-node
+    depends_on:
+      - tss-coordinator
+    cap_add:
+      - NET_ADMIN
+    entrypoint:
+      - /usr/local/bin/node_entrypoint.sh
+    volumes:
+      - ./data/P4:/data
+    environment:
+      # set any of these to enable network emulation inside the container
+      # LATENCY_MS: "80"
+      # JITTER_MS: "20"
+      # LOSS_PCT: "0.5"
+      # TC_IFACE: "eth0"
+      - LATENCY_MS=0
+      - JITTER_MS=0
+      - LOSS_PCT=0
+    command:
+      - "-coordinator=ws://tss-coordinator:9000/ws"
+      - "-session=cluster"
+      - "-party=P4"
+      - "-data=/data"
+      - "-gateway=G"
+
+  tss-node-p5:
+    build:
+      context: ..
+      dockerfile: tssnet/docker/Dockerfile
+      args:
+        CMD: tss-node
+    depends_on:
+      - tss-coordinator
+    cap_add:
+      - NET_ADMIN
+    entrypoint:
+      - /usr/local/bin/node_entrypoint.sh
+    volumes:
+      - ./data/P5:/data
+    environment:
+      # set any of these to enable network emulation inside the container
+      # LATENCY_MS: "80"
+      # JITTER_MS: "20"
+      # LOSS_PCT: "0.5"
+      # TC_IFACE: "eth0"
+      - LATENCY_MS=0
+      - JITTER_MS=0
+      - LOSS_PCT=0
+    command:
+      - "-coordinator=ws://tss-coordinator:9000/ws"
+      - "-session=cluster"
+      - "-party=P5"
       - "-data=/data"
       - "-gateway=G"

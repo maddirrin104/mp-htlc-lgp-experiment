@@ -3,16 +3,11 @@
 Starter kit để chạy thực nghiệm MP-HTLC-LGP trên **testnet** (không dùng Anvil local).
 
 ## 1) Yêu cầu môi trường
-- Linux/WSL2 hoặc macOS
-- Docker + docker compose
-- Go >= 1.22
-- Foundry (forge/cast)
-
-Cài Foundry:
-```bash
-curl -L https://foundry.paradigm.xyz | bash
-foundryup
-```
+- Linux/WSL2 
+- Docker
+- Go 
+- Foundry 
+- npm (node package management)
 
 ## 2) Chuẩn bị ví và faucet
 Tạo 2 ví testnet:
@@ -26,9 +21,9 @@ Tạo file `.env`:
 ```bash
 SEPOLIA_RPC_URL="https://..."
 CHAIN_ID=11155111
-DEPLOYER_PK="0x..."
-RECEIVER_PK="0x..."
-SIGNER_PK="0x..."
+DEPLOYER_PK=""
+RECEIVER_PK=""
+SIGNER_PK="cái này bỏ trống"
 
 # SIGNER_PK la EOA gia lap ADDR_TSS de ky EIP-712 (ban se thay bang TSS that o buoc 6)
 
