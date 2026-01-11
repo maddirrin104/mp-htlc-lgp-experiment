@@ -8,10 +8,15 @@ import {MPHTLC_LGP} from "../contracts/MPHTLC_LGP.sol";
 contract Deploy is Script {
     function run() external {
         uint256 deployerPk = vm.envUint("DEPLOYER_PK");
-        string memory outPath = "configs/deployed.json";
+        string memory out;
+        try vm.envString("DEPLOY_OUT") returns (string memory v) {
+            out = v;
+        } catch {
+            out = "./broadcast_out/deployed.json";
+        }
         // allow override
         try vm.envString("DEPLOY_OUT") returns (string memory p) {
-            if (bytes(p).length != 0) outPath = p;
+            if (bytes(p).length != 0) out = p;
         } catch {}
 
         vm.startBroadcast(deployerPk);
@@ -22,10 +27,10 @@ contract Deploy is Script {
         string memory obj = "deploy";
         vm.serializeAddress(obj, "token", address(token));
         string memory json = vm.serializeAddress(obj, "htlc", address(htlc));
-        vm.writeJson(json, outPath);
+        vm.writeJson(json, out);
 
         console2.log("TOKEN:", address(token));
         console2.log("HTLC:", address(htlc));
-        console2.log("Wrote:", outPath);
+        console2.log("Wrote:", out);
     }
 }
