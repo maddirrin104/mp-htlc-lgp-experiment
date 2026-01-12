@@ -1,10 +1,9 @@
-// maddirrin@DESKTOP-COGF1JC:~/research-blockchain/mp-htlc-lgp-experiment$ curl -X POST http://localhost:9100/keygen
 {
-    "address":"0x897c1C247FACD21a62dbcf1da5f7249A17Bc9fe8",
+    "address":"0x3C87C9D455E2F6AD4582e5fd4eE2e0E96A57A66C",
     "ok":true,
     "parties":["P1","P2","P3","P4","P5"],
-    "pubkey":"0x04cf6b102671a8fdaa9b279b91408682b909687e43068d1fe8774b7bd8ba5e5811eeccebbd6c024e7351669759cb29fbd2797e36af032b1a00999a083c019e8809",
-    "t_keygen_ms":39052,
+    "pubkey":"0x04bfe5473bb970df55ca7895e20ba53f874ad5a611f95655f14efd2cdfe6f92f925f85cf0b20ae1d55f3c44b48325a761643f34d9036075c6ea8dda1fedadeace7",
+    "t_keygen_ms":36415,
     "threshold":2
 }
 
