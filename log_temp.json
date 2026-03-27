@@ -1,9 +1,0 @@
-{
-    "address":"0x3C87C9D455E2F6AD4582e5fd4eE2e0E96A57A66C",
-    "ok":true,
-    "parties":["P1","P2","P3","P4","P5"],
-    "pubkey":"0x04bfe5473bb970df55ca7895e20ba53f874ad5a611f95655f14efd2cdfe6f92f925f85cf0b20ae1d55f3c44b48325a761643f34d9036075c6ea8dda1fedadeace7",
-    "t_keygen_ms":36415,
-    "threshold":2
-}
-
