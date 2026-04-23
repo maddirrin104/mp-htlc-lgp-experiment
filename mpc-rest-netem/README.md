@@ -100,3 +100,44 @@ Khôi phục:
 - `PREPARAM_TIMEOUT=45s`
 
 Các giá trị này được đặt để tránh rớt nội bộ oan dưới WAN delay 150-250ms, nhưng vẫn cho phép tái hiện S5 khi đẩy delay/loss đủ cao.
+
+## Section 6 - Đo lường và so sánh
+
+Mục tiêu của section này là đặt MP-HTLC-LGP cạnh hai baseline trong cùng điều kiện mạng để nhìn rõ cả mặt mạnh lẫn đánh đổi của giao thức.
+
+### Chỉ số đo
+
+- `gas_used`: gas tiêu thụ cho đường `claim`.
+- `capital_efficiency`: tỉ lệ `useful_locked_value / total_locked_capital`.
+- `latency`: thời gian thực thi thực tế của phiên ký MPC, đo qua `T_sign_ms` trong log.
+
+### Baseline so sánh
+
+- Classic HTLC: chỉ có khóa tài sản, không có cơ chế phạt tuyến tính cho receiver collateral.
+- Committee-verification baseline: đường xác thực phụ thuộc số thành viên, nên gas tăng nhanh khi N tăng.
+
+### Kết quả hiện có trong project
+
+- Latency benchmark đã được ghi nhận trong `plots/plot_metrics.py` và ảnh `plots/1.png`:
+  - Baseline 250ms: `0.31s`
+  - Flaky 30% drop: `33.13s`
+  - High latency 4s: `55.60s`
+- Gas benchmark của contract đã được bao phủ bởi test `test_S7_AggregatedClaimGas_RemainsSublinearForN20_50_100` và `test_S7_CommitteeVerificationUpperBoundGas_N20_50_100`.
+
+### Cách vẽ biểu đồ
+
+Chạy script này để xuất 3 ảnh trong cùng thư mục:
+
+```bash
+python plots/plot_metrics.py
+```
+
+Script sẽ tạo:
+
+- `mpc_network_evaluation_final.png` cho latency.
+- `gas_comparison_index.png` cho gas theo kích thước committee.
+- `capital_efficiency_comparison.png` cho capital efficiency.
+
+### Ghi chú phương pháp
+
+Phần gas và capital efficiency hiện được biểu diễn theo cùng profile thực nghiệm của project để dễ so sánh xu hướng. Nếu bạn muốn số tuyệt đối để đưa vào báo cáo/paper, hãy thay các giá trị trong `plots/plot_metrics.py` bằng số đo trích từ `forge test -vvv` và log MPC thực tế.
